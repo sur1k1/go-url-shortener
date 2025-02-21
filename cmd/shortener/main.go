@@ -5,12 +5,10 @@ import (
 	"encoding/hex"
 	"io"
 	"net/http"
-	"sync"
 )
 
 var memstorage = map[string]string{}
 const serverURL = "http://localhost:8080/"
-var c sync.RWMutex
 
 func main() {
 	mux := http.NewServeMux()
@@ -52,9 +50,7 @@ func postHandler(rw http.ResponseWriter, req *http.Request) {
 	replacedURL := serverURL + generateID()
 
 	// Сохранение новой ссылки
-	c.Lock()
 	memstorage[replacedURL] = string(body)
-	c.Unlock()
 
 	// Формирование ответа клиенту
 	rw.Header().Set("Content-Type", "text/plain")
@@ -78,14 +74,12 @@ func getHandler(rw http.ResponseWriter, req *http.Request) {
 	// Парсинг URL для получения ID
 	id := req.URL.Path[1:]
 
-	c.RLock()
 	// Поиск ID в базе данных
 	originalURL, ok := memstorage[serverURL+id]
 	if !ok {
 		http.Error(rw, "id not found", http.StatusBadRequest)
 		return
 	}
-	c.RUnlock()
 
 	// Формирование ответа клиенту
 	rw.Header().Set("Location", originalURL)
