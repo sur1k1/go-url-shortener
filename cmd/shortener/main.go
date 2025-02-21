@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"strings"
 
 	storage "github.com/sur1k1/go-url-shortener/internal/repository/memstorage"
 )
@@ -48,7 +49,8 @@ func (h *Handlers) postHandler(rw http.ResponseWriter, req *http.Request) {
 	}
 
 	// Проверка заголовка на корректность
-	if req.Header.Get("Content-Type") != "text/plain"{
+	contentType := req.Header.Get("Content-Type")
+	if !strings.HasPrefix(contentType, "text/plain") {
 		http.Error(rw, "incorrect content type", http.StatusBadRequest)
 		return
 	}
