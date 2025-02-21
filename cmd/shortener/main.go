@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"io"
+	"log"
 	"net/http"
 )
 
@@ -55,7 +56,10 @@ func postHandler(rw http.ResponseWriter, req *http.Request) {
 	// Формирование ответа клиенту
 	rw.Header().Set("Content-Type", "text/plain")
 	rw.WriteHeader(http.StatusCreated)
-	rw.Write([]byte(replacedURL))
+	_, err = rw.Write([]byte(replacedURL))
+	if err != nil {
+		log.Println("cannot send response", err)
+	}
 }
 
 func getHandler(rw http.ResponseWriter, req *http.Request) {
