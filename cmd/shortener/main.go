@@ -6,22 +6,41 @@ import (
 	"io"
 	"log"
 	"net/http"
+
+	storage "github.com/sur1k1/go-url-shortener/internal/repository/memstorage"
 )
 
-var memstorage = map[string]string{}
 const serverURL = "http://localhost:8080/"
 
+// Описание интерфейса базы данных
+type Storage interface {
+	GetURL(shortURL string) (string, bool)
+	SaveURL(shortURL string, originalURL string)
+}
+
+// Структура для хэндлеров с полем доступа к сторэджу
+type Handlers struct {
+	storage Storage
+}
+
 func main() {
+	// Storage init
+	s := storage.NewStorage()
+
+	// Server init
 	mux := http.NewServeMux()
-	mux.HandleFunc("/", postHandler)
-	mux.HandleFunc("/{id}", getHandler)
+
+	// Register handlers
+	h := Handlers{storage: s}
+	mux.HandleFunc("/", h.postHandler)
+	mux.HandleFunc("/{id}", h.getHandler)
 
 	if err := http.ListenAndServe(`:8080`, mux); err != nil{
 		panic(err)
 	}
 }
 
-func postHandler(rw http.ResponseWriter, req *http.Request) {
+func (h *Handlers) postHandler(rw http.ResponseWriter, req *http.Request) {
 	// Проверка метода запроса
 	if req.Method != http.MethodPost{
 		http.Error(rw, "incorrect request method", http.StatusBadRequest)
@@ -51,7 +70,7 @@ func postHandler(rw http.ResponseWriter, req *http.Request) {
 	replacedURL := serverURL + generateID()
 
 	// Сохранение новой ссылки
-	memstorage[replacedURL] = string(body)
+	h.storage.SaveURL(replacedURL, string(body))
 
 	// Формирование ответа клиенту
 	rw.Header().Set("Content-Type", "text/plain")
@@ -62,7 +81,7 @@ func postHandler(rw http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func getHandler(rw http.ResponseWriter, req *http.Request) {
+func (h *Handlers) getHandler(rw http.ResponseWriter, req *http.Request) {
 	// Проверка метода запроса
 	if req.Method != http.MethodGet{
 		http.Error(rw, "incorrect request method", http.StatusBadRequest)
@@ -79,7 +98,7 @@ func getHandler(rw http.ResponseWriter, req *http.Request) {
 	id := req.URL.Path[1:]
 
 	// Поиск ID в базе данных
-	originalURL, ok := memstorage[serverURL+id]
+	originalURL, ok := h.storage.GetURL(serverURL+id)
 	if !ok {
 		http.Error(rw, "id not found", http.StatusBadRequest)
 		return
