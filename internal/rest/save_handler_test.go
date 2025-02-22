@@ -11,7 +11,7 @@ import (
 	storage "github.com/sur1k1/go-url-shortener/internal/repository/memstorage"
 )
 
-func TestHandlers_PostHandler(t *testing.T) {
+func TestHandlers_SaveHandler(t *testing.T) {
 	tests := []struct {
 		name        string
 		h           *SaveHandler
