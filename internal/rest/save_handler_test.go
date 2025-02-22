@@ -39,18 +39,18 @@ func TestHandlers_SaveHandler(t *testing.T) {
 			ts := httptest.NewServer(r)
 			defer ts.Close()
 
-			resp, body := testSaveRequest(t, ts, tt.httpMethod, "/", tt.contentType, strings.NewReader(tt.originalURL))
+			statusCode, contentType, body := testSaveRequest(t, ts, tt.httpMethod, "/", tt.contentType, strings.NewReader(tt.originalURL))
 
 			assert.NotNil(t, body, "body is nil")
 			
-			assert.Equal(t, tt.wantStatus, resp.StatusCode, "not equal want and actual status code")
+			assert.Equal(t, tt.wantStatus, statusCode, "not equal want and actual status code")
 
-			assert.Contains(t, resp.Header.Get("Content-Type"), "text/plain", "incorrect content type")
+			assert.Contains(t, contentType, "text/plain", "incorrect content type")
 		})
 	}
 }
 
-func testSaveRequest(t *testing.T, ts *httptest.Server, method, path, contentType string, body io.Reader) (*http.Response, string) {
+func testSaveRequest(t *testing.T, ts *httptest.Server, method, path, contentType string, body io.Reader) (int, string, string) {
 	req, err := http.NewRequest(method, ts.URL+path, body)
 	require.NoError(t, err)
 
@@ -63,5 +63,5 @@ func testSaveRequest(t *testing.T, ts *httptest.Server, method, path, contentTyp
 	respBody, err := io.ReadAll(resp.Body)
 	require.NoError(t, err)
 
-	return resp, string(respBody)
+	return resp.StatusCode, resp.Header.Get("Content-Type"), string(respBody)
 }
