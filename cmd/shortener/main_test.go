@@ -43,6 +43,8 @@ func TestHandlers_postHandler(t *testing.T) {
 			res := rw.Result()
 
 			body, err := io.ReadAll(res.Body)
+			defer res.Body.Close()
+			
 			assert.NoError(t, err)
 
 			assert.NotNil(t, body)
