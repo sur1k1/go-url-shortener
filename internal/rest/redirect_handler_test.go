@@ -10,6 +10,8 @@ import (
 )
 
 func TestHandlers_RedirectHandler(t *testing.T) {
+	const tempURL = "http://localhost:8080/"
+
 	tests := []struct {
 		name        string
 		originalURL string
@@ -32,7 +34,7 @@ func TestHandlers_RedirectHandler(t *testing.T) {
 
 			h := &RedirectHandler{getter: s}
 
-			req := httptest.NewRequest(tt.httpMethod, serverURL+tt.shortURL, nil)
+			req := httptest.NewRequest(tt.httpMethod, tempURL+tt.shortURL, nil)
 			rw := httptest.NewRecorder()
 
 			h.RedirectHandler(rw, req)

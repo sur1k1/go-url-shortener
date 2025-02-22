@@ -11,6 +11,7 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
+// Temp address, need fix
 const serverURL = "http://localhost:8080/"
 
 type URLSaver interface {
