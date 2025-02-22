@@ -12,14 +12,18 @@ func main() {
 	// Storage init
 	s := storage.NewStorage()
 
-	// Server init
+	if err := http.ListenAndServe(`:8080`, InitRouter(s)); err != nil{
+		panic(err)
+	}
+}
+
+func InitRouter(s *storage.MemStorage) *chi.Mux {
+	// Router init
 	r := chi.NewRouter()
 
 	// Register handlers
 	rest.NewRedirectHandler(r, s)
 	rest.NewSaveHandler(r, s)
 
-	if err := http.ListenAndServe(`:8080`, r); err != nil{
-		panic(err)
-	}
+	return r
 }
