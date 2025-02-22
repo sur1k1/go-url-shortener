@@ -44,7 +44,7 @@ func TestHandlers_postHandler(t *testing.T) {
 
 			body, err := io.ReadAll(res.Body)
 			defer res.Body.Close()
-			
+
 			assert.NoError(t, err)
 
 			assert.NotNil(t, body)
@@ -82,6 +82,7 @@ func TestHandlers_getHandler(t *testing.T) {
 			tt.h.getHandler(rw, req)
 
 			res := rw.Result()
+			defer res.Body.Close()
 
 			assert.Equal(t, tt.originalURL, res.Header.Get("Location"))
 			assert.Equal(t, tt.wantStatus, res.StatusCode)
