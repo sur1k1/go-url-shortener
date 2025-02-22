@@ -1,6 +1,8 @@
 package storage
 
-import "sync"
+import (
+	"sync"
+)
 
 type MemStorage struct {
 	URLs map[string]string
@@ -19,7 +21,7 @@ func (s *MemStorage) GetURL(shortURL string) (string, bool) {
 	defer s.c.RUnlock()
 
 	url, ok := s.URLs[shortURL]
-	
+
 	return url, ok
 }
 

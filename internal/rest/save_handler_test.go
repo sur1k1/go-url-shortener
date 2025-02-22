@@ -7,14 +7,15 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/go-chi/chi/v5"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	storage "github.com/sur1k1/go-url-shortener/internal/repository/memstorage"
 )
 
 func TestHandlers_SaveHandler(t *testing.T) {
 	tests := []struct {
 		name        string
-		h           *SaveHandler
 		contentType string
 		httpMethod  string
 		originalURL string
@@ -22,7 +23,6 @@ func TestHandlers_SaveHandler(t *testing.T) {
 	}{
 		{
 			name:        "status code 200",
-			h:           &SaveHandler{saver: storage.NewStorage()},
 			contentType: "text/plain",
 			httpMethod:  http.MethodPost,
 			originalURL: "https://www.google.com/",
@@ -31,24 +31,37 @@ func TestHandlers_SaveHandler(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(tt.originalURL))
+			s := storage.NewStorage()
 
-			req.Header.Set("Content-Type", tt.contentType)
+			r := chi.NewRouter()
+			NewSaveHandler(r, s)
 
-			rw := httptest.NewRecorder()
+			ts := httptest.NewServer(r)
+			defer ts.Close()
 
-			tt.h.SaveHandler(rw, req)
+			resp, body := testSaveRequest(t, ts, tt.httpMethod, "/", tt.contentType, strings.NewReader(tt.originalURL))
 
-			res := rw.Result()
+			assert.NotNil(t, body, "body is nil")
+			
+			assert.Equal(t, tt.wantStatus, resp.StatusCode, "not equal want and actual status code")
 
-			body, err := io.ReadAll(res.Body)
-			defer res.Body.Close()
-
-			assert.NoError(t, err)
-
-			assert.NotNil(t, body)
-			assert.Equal(t, tt.wantStatus, res.StatusCode)
-			assert.Contains(t, res.Header.Get("Content-Type"), "text/plain")
+			assert.Contains(t, resp.Header.Get("Content-Type"), "text/plain", "incorrect content type")
 		})
 	}
+}
+
+func testSaveRequest(t *testing.T, ts *httptest.Server, method, path, contentType string, body io.Reader) (*http.Response, string) {
+	req, err := http.NewRequest(method, ts.URL+path, body)
+	require.NoError(t, err)
+
+	req.Header.Set("Content-Type", contentType)
+
+	resp, err := ts.Client().Do(req)
+	require.NoError(t, err)
+	defer resp.Body.Close()
+
+	respBody, err := io.ReadAll(resp.Body)
+	require.NoError(t, err)
+
+	return resp, string(respBody)
 }

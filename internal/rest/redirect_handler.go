@@ -23,12 +23,6 @@ func NewRedirectHandler(r *chi.Mux, u URLGetter) {
 }
 
 func (h *RedirectHandler) RedirectHandler(rw http.ResponseWriter, req *http.Request) {
-	// Проверка метода запроса
-	if req.Method != http.MethodGet {
-		http.Error(rw, "incorrect request method", http.StatusBadRequest)
-		return
-	}
-
 	// Валидация запроса
 	if len(req.URL.Path) < 1 {
 		http.Error(rw, "incorrect url", http.StatusBadRequest)
@@ -37,9 +31,9 @@ func (h *RedirectHandler) RedirectHandler(rw http.ResponseWriter, req *http.Requ
 
 	// Парсинг URL для получения ID
 	id := req.URL.Path[1:]
-
+	
 	// Поиск ID в базе данных
-	originalURL, ok := h.getter.GetURL(serverURL + id)
+	originalURL, ok := h.getter.GetURL(id)
 	if !ok {
 		http.Error(rw, "id not found", http.StatusBadRequest)
 		return

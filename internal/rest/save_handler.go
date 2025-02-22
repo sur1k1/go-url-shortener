@@ -57,15 +57,15 @@ func (h *SaveHandler) SaveHandler(rw http.ResponseWriter, req *http.Request) {
 	}
 
 	// Создание нового URL
-	replacedURL := serverURL + generateID()
+	id := generateID()
 
 	// Сохранение новой ссылки
-	h.saver.SaveURL(replacedURL, string(body))
+	h.saver.SaveURL(id, string(body))
 
 	// Формирование ответа клиенту
 	rw.Header().Set("Content-Type", "text/plain")
 	rw.WriteHeader(http.StatusCreated)
-	_, err = rw.Write([]byte(replacedURL))
+	_, err = rw.Write([]byte(serverURL + id))
 	if err != nil {
 		log.Println("cannot send response", err)
 		return

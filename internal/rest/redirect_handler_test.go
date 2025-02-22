@@ -1,14 +1,11 @@
 package rest
 
 import (
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
-	"github.com/go-chi/chi/v5"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	storage "github.com/sur1k1/go-url-shortener/internal/repository/memstorage"
 )
 
@@ -21,8 +18,8 @@ func TestHandlers_RedirectHandler(t *testing.T) {
 		wantStatus  int
 	}{
 		{
-			name:        "status code 200",
-			originalURL: "https://www.google.com/",
+			name:        "status code 307",
+			originalURL: "https://stackoverflow.com/",
 			shortURL:    generateID(),
 			httpMethod:  http.MethodGet,
 			wantStatus:  http.StatusTemporaryRedirect,
@@ -31,29 +28,20 @@ func TestHandlers_RedirectHandler(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := storage.NewStorage()
-			s.URLs[serverURL+tt.shortURL] = tt.originalURL
+			s.URLs[tt.shortURL] = tt.originalURL
 
-			r := chi.NewRouter()
-			NewRedirectHandler(r, s)
+			h := &RedirectHandler{getter: s}
 
-			ts := httptest.NewServer(r)
-			defer ts.Close()
+			req := httptest.NewRequest(tt.httpMethod, serverURL+tt.shortURL, nil)
+			rw := httptest.NewRecorder()
 
-			resp := testRedirectRequest(t, ts, tt.httpMethod, fmt.Sprintf("/%s", tt.shortURL))
+			h.RedirectHandler(rw, req)
 
-			assert.Equal(t, tt.originalURL, resp.Header.Get("Location"))
-			assert.Equal(t, tt.wantStatus, resp.StatusCode)
+			resp := rw.Result()
+			defer resp.Body.Close()
+
+			assert.Equal(t, tt.originalURL, resp.Header.Get("Location"), "not equal original and actual url in header")
+			assert.Equal(t, tt.wantStatus, resp.StatusCode, "not equal want and actual status code")
 		})
 	}
-}
-
-func testRedirectRequest(t *testing.T, ts *httptest.Server, method, path string) (*http.Response) {
-	req, err := http.NewRequest(method, ts.URL+path, nil)
-	require.NoError(t, err)
-
-	resp, err := ts.Client().Do(req)
-	require.NoError(t, err)
-	defer resp.Body.Close()
-
-	return resp
 }
