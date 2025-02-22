@@ -7,6 +7,8 @@ import (
 	"log"
 	"net/http"
 	"strings"
+
+	"github.com/go-chi/chi/v5"
 )
 
 const serverURL = "http://localhost:8080/"
@@ -19,15 +21,15 @@ type SaveHandler struct {
 	saver URLSaver
 }
 
-func NewSaveHandler(mux *http.ServeMux, u URLSaver) {
+func NewSaveHandler(r *chi.Mux, u URLSaver) {
 	handler := &SaveHandler{
 		saver: u,
 	}
 
-	mux.HandleFunc("/", handler.PostHandler)
+	r.Post("/", handler.SaveHandler)
 }
 
-func (h *SaveHandler) PostHandler(rw http.ResponseWriter, req *http.Request) {
+func (h *SaveHandler) SaveHandler(rw http.ResponseWriter, req *http.Request) {
 	// Проверка метода запроса
 	if req.Method != http.MethodPost{
 		http.Error(rw, "incorrect request method", http.StatusBadRequest)

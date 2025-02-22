@@ -1,6 +1,10 @@
 package rest
 
-import "net/http"
+import (
+	"net/http"
+
+	"github.com/go-chi/chi/v5"
+)
 
 type URLGetter interface {
 	GetURL(shortURL string) (string, bool)
@@ -10,15 +14,15 @@ type RedirectHandler struct {
 	getter URLGetter
 }
 
-func NewRedirectHandler(mux *http.ServeMux, u URLGetter) {
+func NewRedirectHandler(r *chi.Mux, u URLGetter) {
 	handler := &RedirectHandler{
 		getter: u,
 	}
 
-	mux.HandleFunc("/{id}", handler.GetHandler)
+	r.Get("/{id}", handler.RedirectHandler)
 }
 
-func (h *RedirectHandler) GetHandler(rw http.ResponseWriter, req *http.Request) {
+func (h *RedirectHandler) RedirectHandler(rw http.ResponseWriter, req *http.Request) {
 	// Проверка метода запроса
 	if req.Method != http.MethodGet {
 		http.Error(rw, "incorrect request method", http.StatusBadRequest)

@@ -35,7 +35,7 @@ func TestHandlers_GetHandler(t *testing.T) {
 			req := httptest.NewRequest(tt.httpMethod, fmt.Sprintf("/%s", tt.shortURL), nil)
 			rw := httptest.NewRecorder()
 
-			h.GetHandler(rw, req)
+			h.RedirectHandler(rw, req)
 
 			res := rw.Result()
 			defer res.Body.Close()

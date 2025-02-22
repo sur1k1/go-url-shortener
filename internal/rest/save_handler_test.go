@@ -37,7 +37,7 @@ func TestHandlers_PostHandler(t *testing.T) {
 
 			rw := httptest.NewRecorder()
 
-			tt.h.PostHandler(rw, req)
+			tt.h.SaveHandler(rw, req)
 
 			res := rw.Result()
 

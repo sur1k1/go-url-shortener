@@ -3,6 +3,7 @@ package main
 import (
 	"net/http"
 
+	"github.com/go-chi/chi/v5"
 	storage "github.com/sur1k1/go-url-shortener/internal/repository/memstorage"
 	"github.com/sur1k1/go-url-shortener/internal/rest"
 )
@@ -12,13 +13,13 @@ func main() {
 	s := storage.NewStorage()
 
 	// Server init
-	mux := http.NewServeMux()
+	r := chi.NewRouter()
 
 	// Register handlers
-	rest.NewRedirectHandler(mux, s)
-	rest.NewSaveHandler(mux, s)
+	rest.NewRedirectHandler(r, s)
+	rest.NewSaveHandler(r, s)
 
-	if err := http.ListenAndServe(`:8080`, mux); err != nil{
+	if err := http.ListenAndServe(`:8080`, r); err != nil{
 		panic(err)
 	}
 }
