@@ -31,10 +31,12 @@ func TestHandlers_SaveHandler(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			const publicAddress = "http://localhost:8080/"
+
 			s := storage.NewStorage()
 
 			r := chi.NewRouter()
-			NewSaveHandler(r, s)
+			NewSaveHandler(r, s, publicAddress)
 
 			ts := httptest.NewServer(r)
 			defer ts.Close()

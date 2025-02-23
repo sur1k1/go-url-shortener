@@ -11,20 +11,19 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-// Temp address, need fix
-const serverURL = "http://localhost:8080/"
-
 type URLSaver interface {
 	SaveURL(shortURL string, originalURL string)
 }
 
 type SaveHandler struct {
-	saver URLSaver
+	saver 	URLSaver
+	pubAddr string
 }
 
-func NewSaveHandler(r *chi.Mux, u URLSaver) {
+func NewSaveHandler(r *chi.Mux, u URLSaver, pubAddr string) {
 	handler := &SaveHandler{
 		saver: u,
+		pubAddr: pubAddr,
 	}
 
 	r.Post("/", handler.SaveHandler)
@@ -66,7 +65,7 @@ func (h *SaveHandler) SaveHandler(rw http.ResponseWriter, req *http.Request) {
 	// Формирование ответа клиенту
 	rw.Header().Set("Content-Type", "text/plain")
 	rw.WriteHeader(http.StatusCreated)
-	_, err = rw.Write([]byte(serverURL + id))
+	_, err = rw.Write([]byte(h.pubAddr + id))
 	if err != nil {
 		log.Println("cannot send response", err)
 		return
