@@ -16,7 +16,7 @@ func main() {
 	// Storage init
 	s := storage.NewStorage()
 
-	if err := http.ListenAndServe(cf.ServerAddress, InitRouter(s, cf.PublicAddress)); err != nil{
+	if err := http.ListenAndServe(cf.ServerAddress, InitRouter(s, cf.BaseURL)); err != nil{
 		panic(err)
 	}
 }
