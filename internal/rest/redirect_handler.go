@@ -35,7 +35,7 @@ func (h *RedirectHandler) RedirectHandler(rw http.ResponseWriter, req *http.Requ
 	// Поиск ID в базе данных
 	originalURL, ok := h.getter.GetURL(id)
 	if !ok {
-		http.Error(rw, "id not found", http.StatusBadRequest)
+		http.Error(rw, "id not found", http.StatusNotFound)
 		return
 	}
 

@@ -30,12 +30,6 @@ func NewSaveHandler(r *chi.Mux, u URLSaver, pubAddr string) {
 }
 
 func (h *SaveHandler) SaveHandler(rw http.ResponseWriter, req *http.Request) {
-	// Проверка метода запроса
-	if req.Method != http.MethodPost{
-		http.Error(rw, "incorrect request method", http.StatusBadRequest)
-		return
-	}
-
 	// Проверка заголовка на корректность
 	contentType := req.Header.Get("Content-Type")
 	if !strings.HasPrefix(contentType, "text/plain") {
@@ -46,7 +40,7 @@ func (h *SaveHandler) SaveHandler(rw http.ResponseWriter, req *http.Request) {
 	// Чтение тела запроса
 	body, err := io.ReadAll(req.Body)
 	if err != nil {
-		http.Error(rw, err.Error(), http.StatusBadRequest)
+		http.Error(rw, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
