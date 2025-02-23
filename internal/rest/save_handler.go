@@ -61,11 +61,11 @@ func (h *SaveHandler) SaveHandler(rw http.ResponseWriter, req *http.Request) {
 
 	// Сохранение новой ссылки
 	h.saver.SaveURL(id, string(body))
-
+	log.Println(h.pubAddr + "/" + id)
 	// Формирование ответа клиенту
 	rw.Header().Set("Content-Type", "text/plain")
 	rw.WriteHeader(http.StatusCreated)
-	_, err = rw.Write([]byte(h.pubAddr + id))
+	_, err = rw.Write([]byte(h.pubAddr + "/" + id))
 	if err != nil {
 		log.Println("cannot send response", err)
 		return
