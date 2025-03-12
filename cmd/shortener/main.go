@@ -1,33 +1,44 @@
 package main
 
 import (
-	"net/http"
+	"fmt"
+	"os"
+	"os/signal"
+	"syscall"
 
-	"github.com/go-chi/chi/v5"
+	"github.com/sur1k1/go-url-shortener/internal/app/rest"
 	"github.com/sur1k1/go-url-shortener/internal/config"
+	"github.com/sur1k1/go-url-shortener/internal/logger"
 	storage "github.com/sur1k1/go-url-shortener/internal/repository/memstorage"
-	"github.com/sur1k1/go-url-shortener/internal/rest"
 )
 
 func main() {
 	// Getting a configuration
 	cf := config.MustGetConfig()
+
+	// Logger init
+	log, err := logger.New(cf.LogLevel)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+    os.Exit(1)
+	}
 	
 	// Storage init
 	s := storage.NewStorage()
 
-	if err := http.ListenAndServe(cf.ServerAddress, InitRouter(s, cf.BaseURL)); err != nil{
-		panic(err)
-	}
-}
+	// Init application
+	application := rest.New(log, s, cf)
 
-func InitRouter(s *storage.MemStorage, pubAddr string) *chi.Mux {
-	// Router init
-	r := chi.NewRouter()
+	// Start server
+	go func() {
+		application.MustRun()
+	}()
 
-	// Register handlers
-	rest.NewRedirectHandler(r, s)
-	rest.NewSaveHandler(r, s, pubAddr)
+	// Gracefull shutdown
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, syscall.SIGTERM, syscall.SIGINT)
 
-	return r
+	<- stop
+
+	log.Info("Gracefully stopped")
 }
