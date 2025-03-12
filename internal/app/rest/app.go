@@ -7,6 +7,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/sur1k1/go-url-shortener/internal/config"
 	"github.com/sur1k1/go-url-shortener/internal/rest"
+	"github.com/sur1k1/go-url-shortener/internal/rest/middlewares"
 	"go.uber.org/zap"
 )
 
@@ -25,6 +26,12 @@ func New(log *zap.Logger, repo ServiceRepository, cf *config.Config) *App {
 	// Router init
 	r := chi.NewRouter()
 
+	// Init middlewares
+	lm := middlewares.NewLoggerMiddleware(log)
+
+	// Register middlewares
+	r.Use(lm.Logger)
+	
 	// Register handlers
 	rest.NewRedirectHandler(r, repo)
 	rest.NewSaveHandler(r, repo, cf.BaseURL)
