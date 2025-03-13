@@ -22,7 +22,7 @@ func TestHandlers_SaveHandler(t *testing.T) {
 		wantStatus  int
 	}{
 		{
-			name:        "status code 200",
+			name:        "status code 201",
 			contentType: "text/plain",
 			httpMethod:  http.MethodPost,
 			originalURL: "https://www.google.com/",

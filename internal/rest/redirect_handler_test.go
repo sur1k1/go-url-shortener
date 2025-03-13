@@ -7,6 +7,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	storage "github.com/sur1k1/go-url-shortener/internal/repository/memstorage"
+	"github.com/sur1k1/go-url-shortener/internal/util/generate"
 )
 
 func TestHandlers_RedirectHandler(t *testing.T) {
@@ -22,7 +23,7 @@ func TestHandlers_RedirectHandler(t *testing.T) {
 		{
 			name:        "status code 307",
 			originalURL: "https://stackoverflow.com/",
-			shortURL:    generateID(),
+			shortURL:    generate.GenerateID(),
 			httpMethod:  http.MethodGet,
 			wantStatus:  http.StatusTemporaryRedirect,
 		},

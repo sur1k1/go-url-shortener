@@ -35,6 +35,7 @@ func New(log *zap.Logger, repo ServiceRepository, cf *config.Config) *App {
 	// Register handlers
 	rest.NewRedirectHandler(r, repo)
 	rest.NewSaveHandler(r, repo, cf.BaseURL)
+	rest.NewShortJSONHandler(r, repo, cf.BaseURL)
 
 	return &App{
 		log: log,

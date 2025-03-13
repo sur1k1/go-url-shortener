@@ -1,14 +1,13 @@
 package rest
 
 import (
-	"crypto/rand"
-	"encoding/hex"
 	"io"
 	"log"
 	"net/http"
 	"strings"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/sur1k1/go-url-shortener/internal/util/generate"
 )
 
 type URLSaver interface {
@@ -51,7 +50,7 @@ func (h *SaveHandler) SaveHandler(rw http.ResponseWriter, req *http.Request) {
 	}
 
 	// Создание нового URL
-	id := generateID()
+	id := generate.GenerateID()
 
 	// Сохранение новой ссылки
 	h.saver.SaveURL(id, string(body))
@@ -64,10 +63,4 @@ func (h *SaveHandler) SaveHandler(rw http.ResponseWriter, req *http.Request) {
 		log.Println("cannot send response", err)
 		return
 	}
-}
-
-func generateID() string {
-	b := make([]byte, 4)
-	rand.Read(b)
-	return hex.EncodeToString(b)
 }
