@@ -3,6 +3,7 @@ package middlewares
 import (
 	"compress/gzip"
 	"io"
+	"log"
 	"net/http"
 	"strings"
 
@@ -20,12 +21,15 @@ func NewCompressMiddleware(log *zap.Logger) *CompressMiddleware {
 }
 
 func (m *CompressMiddleware) Compress(h http.Handler) http.Handler {
+	const op = "middlewares.Compress"
+
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		ow := w
 
 		acceptEncoding := r.Header.Get("Accept-Encoding")
 		supportsGzip := strings.Contains(acceptEncoding, "gzip")
 		if supportsGzip {
+			log.Println("ГЗИП СТОИТ")
 			cw := newCompressWriter(w)
 			ow = cw
 			defer cw.Close()
@@ -36,6 +40,11 @@ func (m *CompressMiddleware) Compress(h http.Handler) http.Handler {
 		if sendsGzip {
 			cr, err := newCompressReader(r.Body)
 			if err != nil {
+					m.log.Info("cannot create compress reader",
+						zap.String("path", op),
+						zap.Error(err),
+					)
+
 					w.WriteHeader(http.StatusInternalServerError)
 					return
 			}

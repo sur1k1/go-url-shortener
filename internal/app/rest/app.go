@@ -28,9 +28,10 @@ func New(log *zap.Logger, repo ServiceRepository, cf *config.Config) *App {
 
 	// Init middlewares
 	lm := middlewares.NewLoggerMiddleware(log)
+	cp := middlewares.NewCompressMiddleware(log)
 
 	// Register middlewares
-	r.Use(lm.Logger)
+	r.Use(lm.Logger, cp.Compress)
 	
 	// Register handlers
 	rest.NewRedirectHandler(r, repo, log)
