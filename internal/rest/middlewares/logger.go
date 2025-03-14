@@ -38,7 +38,7 @@ func NewLoggerMiddleware(log *zap.Logger) *LoggerMiddleware {
 	}
 }
 
-func (lm *LoggerMiddleware) Logger(h http.Handler) http.Handler {
+func (m *LoggerMiddleware) Logger(h http.Handler) http.Handler {
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		timeStart := time.Now()
 
@@ -55,7 +55,7 @@ func (lm *LoggerMiddleware) Logger(h http.Handler) http.Handler {
 
 		timeSince := time.Since(timeStart)
 
-		lm.log.Info(
+		m.log.Info(
 			"request info",
 			zap.String("URI", r.RequestURI),
 			zap.String("method", r.Method),
