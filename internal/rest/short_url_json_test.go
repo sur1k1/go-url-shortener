@@ -39,7 +39,7 @@ func TestShortenJSONHandler_ShortJSONHandler(t *testing.T) {
 			s := storage.NewStorage()
 
 			r := chi.NewRouter()
-			NewSaveHandler(r, s, testPublicAddress)
+			NewShortJSONHandler(r, s, testPublicAddress)
 
 			ts := httptest.NewServer(r)
 			defer ts.Close()
