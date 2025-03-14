@@ -31,18 +31,6 @@ func NewSaveHandler(r *chi.Mux, u URLSaver, pubAddr string, log *zap.Logger) {
 
 func (h *SaveHandler) SaveHandler(rw http.ResponseWriter, req *http.Request) {
 	const op = "rest.SaveHandler"
-
-	// Проверка заголовка на корректность
-	// contentType := req.Header.Get("Content-Type")
-	// if !strings.HasPrefix(contentType, "text/plain") {
-	// 	h.log.Info(
-	// 		"incorrect content type",
-	// 		zap.String("path", op),
-	// 	)
-
-	// 	http.Error(rw, "incorrect content type", http.StatusBadRequest)
-	// 	return
-	// }
 	
 	// Чтение тела запроса
 	body, err := io.ReadAll(req.Body)
