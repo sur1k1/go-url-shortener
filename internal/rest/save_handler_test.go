@@ -10,6 +10,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/sur1k1/go-url-shortener/internal/logger"
 	storage "github.com/sur1k1/go-url-shortener/internal/repository/memstorage"
 )
 
@@ -37,7 +38,11 @@ func TestHandlers_SaveHandler(t *testing.T) {
 			s := storage.NewStorage()
 
 			r := chi.NewRouter()
-			NewSaveHandler(r, s, publicAddress)
+
+			log, err := logger.New("info")
+			require.NoError(t, err)
+
+			NewSaveHandler(r, s, publicAddress, log)
 
 			ts := httptest.NewServer(r)
 			defer ts.Close()

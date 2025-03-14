@@ -6,6 +6,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"github.com/sur1k1/go-url-shortener/internal/logger"
 	storage "github.com/sur1k1/go-url-shortener/internal/repository/memstorage"
 	"github.com/sur1k1/go-url-shortener/internal/util/generate"
 )
@@ -33,7 +35,10 @@ func TestHandlers_RedirectHandler(t *testing.T) {
 			s := storage.NewStorage()
 			s.URLs[tt.shortURL] = tt.originalURL
 
-			h := &RedirectHandler{getter: s}
+			log, err := logger.New("info")
+			require.NoError(t, err)
+
+			h := &RedirectHandler{getter: s, log: log}
 
 			req := httptest.NewRequest(tt.httpMethod, tempURL+tt.shortURL, nil)
 			rw := httptest.NewRecorder()

@@ -2,12 +2,12 @@ package rest
 
 import (
 	"io"
-	"log"
 	"net/http"
 	"strings"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/sur1k1/go-url-shortener/internal/util/generate"
+	"go.uber.org/zap"
 )
 
 type URLSaver interface {
@@ -17,21 +17,30 @@ type URLSaver interface {
 type SaveHandler struct {
 	saver 	URLSaver
 	pubAddr string
+	log 		*zap.Logger
 }
 
-func NewSaveHandler(r *chi.Mux, u URLSaver, pubAddr string) {
+func NewSaveHandler(r *chi.Mux, u URLSaver, pubAddr string, log *zap.Logger) {
 	handler := &SaveHandler{
 		saver: u,
 		pubAddr: pubAddr,
+		log: log,
 	}
 
 	r.Post("/", handler.SaveHandler)
 }
 
 func (h *SaveHandler) SaveHandler(rw http.ResponseWriter, req *http.Request) {
+	const op = "rest.SaveHandler"
+
 	// Проверка заголовка на корректность
 	contentType := req.Header.Get("Content-Type")
 	if !strings.HasPrefix(contentType, "text/plain") {
+		h.log.Info(
+			"incorrect content type",
+			zap.String("path", op),
+		)
+
 		http.Error(rw, "incorrect content type", http.StatusBadRequest)
 		return
 	}
@@ -39,12 +48,22 @@ func (h *SaveHandler) SaveHandler(rw http.ResponseWriter, req *http.Request) {
 	// Чтение тела запроса
 	body, err := io.ReadAll(req.Body)
 	if err != nil {
+		h.log.Info(
+			"failed to read body",
+			zap.String("path", op),
+		)
+
 		http.Error(rw, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	// Валидация запроса
 	if len(body) == 0{
+		h.log.Info(
+			"request body is nil",
+			zap.String("path", op),
+		)
+
 		http.Error(rw, "body is nil", http.StatusBadRequest)
 		return
 	}
@@ -60,7 +79,11 @@ func (h *SaveHandler) SaveHandler(rw http.ResponseWriter, req *http.Request) {
 	rw.WriteHeader(http.StatusCreated)
 	_, err = rw.Write([]byte(h.pubAddr + "/" + id))
 	if err != nil {
-		log.Println("cannot send response", err)
+		h.log.Info(
+			"failed to send response",
+			zap.String("path", op),
+		)
+
 		return
 	}
 }

@@ -10,6 +10,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/sur1k1/go-url-shortener/internal/logger"
 	"github.com/sur1k1/go-url-shortener/internal/models"
 	storage "github.com/sur1k1/go-url-shortener/internal/repository/memstorage"
 )
@@ -40,7 +41,11 @@ func TestShortenJSONHandler_ShortJSONHandler(t *testing.T) {
 			s := storage.NewStorage()
 
 			r := chi.NewRouter()
-			NewShortJSONHandler(r, s, publicAddress)
+
+			log, err := logger.New("info")
+			require.NoError(t, err)
+
+			NewShortJSONHandler(r, s, publicAddress, log)
 
 			ts := httptest.NewServer(r)
 			defer ts.Close()
