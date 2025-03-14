@@ -1,13 +1,13 @@
 package rest
 
 import (
+	"bytes"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/go-resty/resty/v2"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/sur1k1/go-url-shortener/internal/models"
@@ -46,8 +46,9 @@ func TestShortenJSONHandler_ShortJSONHandler(t *testing.T) {
 
 			statusCode, contentType, resp := testShortenJSONHandlerRequest(
 				t,
+				ts,
 				tt.httpMethod,
-				publicAddress,
+				publicAddress+"api/shorten",
 				tt.contentType,
 				tt.reqBody,
 			)
@@ -61,20 +62,24 @@ func TestShortenJSONHandler_ShortJSONHandler(t *testing.T) {
 	}
 }
 
-func testShortenJSONHandlerRequest(t *testing.T, method, path, contentType string, body models.ShortenRequest) (int, string, models.ShortenResponse) {
-	request := resty.New().R()
+func testShortenJSONHandlerRequest(t *testing.T, ts *httptest.Server, method, path, contentType string, body models.ShortenRequest) (int, string, models.ShortenResponse) {
+	var buf bytes.Buffer
 
-	request.Method = method
-	request.URL = path
-	request.Body = body
-	request.SetHeader("Content-Type", contentType)
+	err := json.NewEncoder(&buf).Encode(body)
+	require.NoError(t, err, "failed to encode body")
 
-	resp, err := request.Send()
-	require.NoError(t, err)
+	req, err := http.NewRequest(method, path, &buf)
+	require.NoError(t, err, "failed to create request")
+
+	req.Header.Set("Content-Type", contentType)
+
+	resp, err := ts.Client().Do(req)
+	require.NoError(t, err, "failed to send request")
+	defer resp.Body.Close()
 
 	var modelResp models.ShortenResponse
-	err = json.Unmarshal(resp.Body(), &modelResp)
-	require.NoError(t, err)
+	err = json.NewDecoder(resp.Body).Decode(&modelResp)
+	require.NoError(t, err, "failed to encode resp body")
 
-	return resp.StatusCode(), resp.Header().Get("Content-Type"), modelResp
+	return resp.StatusCode, resp.Header.Get("Content-Type"), modelResp
 }
