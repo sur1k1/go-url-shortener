@@ -32,6 +32,7 @@ func TestHandlers_SaveHandler(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			const publicAddress = "http://localhost:8080/"
+			const path = "/"
 
 			s := storage.NewStorage()
 
@@ -40,8 +41,8 @@ func TestHandlers_SaveHandler(t *testing.T) {
 
 			ts := httptest.NewServer(r)
 			defer ts.Close()
-			
-			statusCode, contentType, body := testSaveRequest(t, ts, tt.httpMethod, "/", tt.contentType, strings.NewReader(tt.originalURL))
+
+			statusCode, contentType, body := testSaveRequest(t, ts, tt.httpMethod, path, tt.contentType, strings.NewReader(tt.originalURL))
 
 			assert.NotNil(t, body, "body is nil")
 			

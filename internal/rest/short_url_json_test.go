@@ -16,6 +16,7 @@ import (
 
 func TestShortenJSONHandler_ShortJSONHandler(t *testing.T) {
 	const publicAddress = "http://localhost:8080/"
+	const path = "/api/shorten"
 
 	tests := []struct {
 		name string
@@ -48,7 +49,7 @@ func TestShortenJSONHandler_ShortJSONHandler(t *testing.T) {
 				t,
 				ts,
 				tt.httpMethod,
-				publicAddress+"api/shorten",
+				path,
 				tt.contentType,
 				tt.reqBody,
 			)
@@ -68,7 +69,7 @@ func testShortenJSONHandlerRequest(t *testing.T, ts *httptest.Server, method, pa
 	err := json.NewEncoder(&buf).Encode(body)
 	require.NoError(t, err, "failed to encode body")
 
-	req, err := http.NewRequest(method, path, &buf)
+	req, err := http.NewRequest(method, ts.URL+path, &buf)
 	require.NoError(t, err, "failed to create request")
 
 	req.Header.Set("Content-Type", contentType)
