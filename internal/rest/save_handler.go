@@ -85,6 +85,7 @@ func (h *SaveHandler) SaveHandler(rw http.ResponseWriter, req *http.Request) {
 			zap.String("path", op),
 		)
 
+		http.Error(rw, err.Error(), http.StatusInternalServerError)
 		return
 	}
 }
