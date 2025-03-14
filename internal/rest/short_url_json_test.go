@@ -15,7 +15,7 @@ import (
 )
 
 func TestShortenJSONHandler_ShortJSONHandler(t *testing.T) {
-	const testPublicAddress = "http://localhost:8080/api/shorten"
+	const publicAddress = "http://localhost:8080/"
 
 	tests := []struct {
 		name string
@@ -39,7 +39,7 @@ func TestShortenJSONHandler_ShortJSONHandler(t *testing.T) {
 			s := storage.NewStorage()
 
 			r := chi.NewRouter()
-			NewShortJSONHandler(r, s, testPublicAddress)
+			NewShortJSONHandler(r, s, publicAddress)
 
 			ts := httptest.NewServer(r)
 			defer ts.Close()
@@ -47,7 +47,7 @@ func TestShortenJSONHandler_ShortJSONHandler(t *testing.T) {
 			statusCode, contentType, resp := testShortenJSONHandlerRequest(
 				t,
 				tt.httpMethod,
-				testPublicAddress,
+				publicAddress,
 				tt.contentType,
 				tt.reqBody,
 			)
