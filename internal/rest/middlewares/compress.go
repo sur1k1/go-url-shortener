@@ -34,6 +34,7 @@ func (m *CompressMiddleware) Compress(h http.Handler) http.Handler {
 
 		contentEncoding := r.Header.Get("Content-Encoding")
 		sendsGzip := strings.Contains(contentEncoding, "gzip")
+
 		if sendsGzip {
 			cr, err := newCompressReader(r.Body)
 			if err != nil {
@@ -45,6 +46,7 @@ func (m *CompressMiddleware) Compress(h http.Handler) http.Handler {
 					w.WriteHeader(http.StatusInternalServerError)
 					return
 			}
+
 			r.Body = cr
 
 			defer cr.Close()
@@ -95,7 +97,7 @@ type compressReader struct {
 func newCompressReader(r io.ReadCloser) (*compressReader, error) {
 	zr, err := gzip.NewReader(r)
 	if err != nil {
-			return nil, err
+		return nil, err
 	}
 
 	return &compressReader{

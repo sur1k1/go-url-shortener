@@ -3,7 +3,6 @@ package rest
 import (
 	"io"
 	"net/http"
-	"strings"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/sur1k1/go-url-shortener/internal/util/generate"
@@ -34,17 +33,17 @@ func (h *SaveHandler) SaveHandler(rw http.ResponseWriter, req *http.Request) {
 	const op = "rest.SaveHandler"
 
 	// Проверка заголовка на корректность
-	contentType := req.Header.Get("Content-Type")
-	if !strings.HasPrefix(contentType, "text/plain") {
-		h.log.Info(
-			"incorrect content type",
-			zap.String("path", op),
-		)
+	// contentType := req.Header.Get("Content-Type")
+	// if !strings.HasPrefix(contentType, "text/plain") {
+	// 	h.log.Info(
+	// 		"incorrect content type",
+	// 		zap.String("path", op),
+	// 	)
 
-		http.Error(rw, "incorrect content type", http.StatusBadRequest)
-		return
-	}
-
+	// 	http.Error(rw, "incorrect content type", http.StatusBadRequest)
+	// 	return
+	// }
+	
 	// Чтение тела запроса
 	body, err := io.ReadAll(req.Body)
 	if err != nil {
