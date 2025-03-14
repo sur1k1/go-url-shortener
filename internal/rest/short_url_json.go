@@ -70,13 +70,24 @@ func (h *ShortenJSONHandler) ShortJSONHandler(rw http.ResponseWriter, req *http.
 	rw.WriteHeader(http.StatusCreated)
 
 
-	if err := json.NewEncoder(rw).Encode(&resp); err != nil {
+	respBody, err := json.Marshal(resp)
+	if err != nil {
 		h.log.Info(
-			"failed to encode response",
+			"failed to marshal body",
 			zap.String("path", op),
 		)
 
-		http.Error(rw, "error encoding response", http.StatusInternalServerError)
+		http.Error(rw, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	_, err = rw.Write(respBody)
+	if err != nil {
+		h.log.Info(
+			"failed to send response",
+			zap.String("path", op),
+		)
+
 		return
 	}
 }
