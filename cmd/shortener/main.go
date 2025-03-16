@@ -24,7 +24,11 @@ func main() {
 	}
 	
 	// Storage init
-	s := storage.NewStorage()
+	s, err := storage.NewStorage(log, cf.FilePath)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+    os.Exit(1)
+	}
 
 	// Init application
 	application := rest.New(log, s, cf)

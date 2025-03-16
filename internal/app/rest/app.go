@@ -6,14 +6,15 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/sur1k1/go-url-shortener/internal/config"
+	"github.com/sur1k1/go-url-shortener/internal/models"
 	"github.com/sur1k1/go-url-shortener/internal/rest"
 	"github.com/sur1k1/go-url-shortener/internal/rest/middlewares"
 	"go.uber.org/zap"
 )
 
 type ServiceRepository interface {
-	GetURL(shortURL string) (string, bool)
-	SaveURL(shortURL string, originalURL string)
+	GetURL(shortURL string) (models.URLData, bool)
+	SaveURL(urlData models.URLData)
 }
 
 type App struct {

@@ -10,6 +10,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/sur1k1/go-url-shortener/internal/config"
 	"github.com/sur1k1/go-url-shortener/internal/logger"
 	"github.com/sur1k1/go-url-shortener/internal/models"
 	storage "github.com/sur1k1/go-url-shortener/internal/repository/memstorage"
@@ -18,6 +19,15 @@ import (
 func TestShortenJSONHandler_ShortJSONHandler(t *testing.T) {
 	const publicAddress = "http://localhost:8080/"
 	const path = "/api/shorten"
+
+	// Getting a configuration
+	cf := config.MustGetConfig()
+
+	log, err := logger.New("info")
+	require.NoError(t, err)
+
+	s, err := storage.NewStorage(log, cf.FilePath)
+	require.NoError(t, err)
 
 	tests := []struct {
 		name string
@@ -38,11 +48,8 @@ func TestShortenJSONHandler_ShortJSONHandler(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := storage.NewStorage()
-
 			r := chi.NewRouter()
 
-			log, err := logger.New("info")
 			require.NoError(t, err)
 
 			NewShortJSONHandler(r, s, publicAddress, log)

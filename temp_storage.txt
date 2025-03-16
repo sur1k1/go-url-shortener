@@ -1,0 +1,3 @@
+{"uuid":"1","short_url":"5f6ac9ce","original_url":"H4sIAAAAAAAAA8soKSkottLXr0zUKyoFABX4u64NAAAA"}
+{"uuid":"2","short_url":"79602bc8","original_url":"https://ya.ru"}
+{"uuid":"3","short_url":"9ae47192","original_url":"https://google.com"}

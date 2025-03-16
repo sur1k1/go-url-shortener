@@ -4,11 +4,12 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/sur1k1/go-url-shortener/internal/models"
 	"go.uber.org/zap"
 )
 
 type URLGetter interface {
-	GetURL(shortURL string) (string, bool)
+	GetURL(shortURL string) (models.URLData, bool)
 }
 
 type RedirectHandler struct {
@@ -43,12 +44,12 @@ func (h *RedirectHandler) RedirectHandler(rw http.ResponseWriter, req *http.Requ
 	id := req.URL.Path[1:]
 	
 	// Поиск ID в базе данных
-	originalURL, ok := h.getter.GetURL(id)
+	urlData, ok := h.getter.GetURL(id)
 	if !ok {
 		h.log.Info(
 			"id not found",
 			zap.String("path", op),
-			zap.String("url", originalURL),
+			zap.String("id", id),
 		)
 
 		http.Error(rw, "id not found", http.StatusNotFound)
@@ -56,6 +57,6 @@ func (h *RedirectHandler) RedirectHandler(rw http.ResponseWriter, req *http.Requ
 	}
 
 	// Формирование ответа клиенту
-	rw.Header().Set("Location", originalURL)
+	rw.Header().Set("Location", urlData.OriginalURL)
 	rw.WriteHeader(http.StatusTemporaryRedirect)
 }

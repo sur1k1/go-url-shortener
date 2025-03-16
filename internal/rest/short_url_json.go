@@ -59,7 +59,10 @@ func (h *ShortenJSONHandler) ShortJSONHandler(rw http.ResponseWriter, req *http.
 	id := generate.GenerateID()
 
 	// Сохранение новой ссылки
-	h.saver.SaveURL(id, reqBody.URL)
+	h.saver.SaveURL(models.URLData{
+		ShortURL: id,
+		OriginalURL: reqBody.URL,
+	})
 
 	resp := models.ShortenResponse{
 		Reslut: h.pubAddr + "/" + id,

@@ -10,11 +10,21 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/sur1k1/go-url-shortener/internal/config"
 	"github.com/sur1k1/go-url-shortener/internal/logger"
 	storage "github.com/sur1k1/go-url-shortener/internal/repository/memstorage"
 )
 
 func TestHandlers_SaveHandler(t *testing.T) {
+	// Getting a configuration
+	cf := config.MustGetConfig()
+
+	log, err := logger.New("info")
+	require.NoError(t, err)
+
+	s, err := storage.NewStorage(log, cf.FilePath)
+	require.NoError(t, err)
+
 	tests := []struct {
 		name        string
 		contentType string
@@ -34,8 +44,6 @@ func TestHandlers_SaveHandler(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			const publicAddress = "http://localhost:8080/"
 			const path = "/"
-
-			s := storage.NewStorage()
 
 			r := chi.NewRouter()
 

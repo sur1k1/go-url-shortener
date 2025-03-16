@@ -5,12 +5,13 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/sur1k1/go-url-shortener/internal/models"
 	"github.com/sur1k1/go-url-shortener/internal/util/generate"
 	"go.uber.org/zap"
 )
 
 type URLSaver interface {
-	SaveURL(shortURL string, originalURL string)
+	SaveURL(urlData models.URLData)
 }
 
 type SaveHandler struct {
@@ -59,7 +60,10 @@ func (h *SaveHandler) SaveHandler(rw http.ResponseWriter, req *http.Request) {
 	id := generate.GenerateID()
 
 	// Сохранение новой ссылки
-	h.saver.SaveURL(id, string(body))
+	h.saver.SaveURL(models.URLData{
+		ShortURL: id,
+		OriginalURL: string(body),
+	})
 	
 	// Формирование ответа клиенту
 	rw.Header().Set("Content-Type", "text/plain")
