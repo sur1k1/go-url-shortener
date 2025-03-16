@@ -43,12 +43,13 @@ func TestHandlers_RedirectHandler(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s.SaveURL(models.URLData{
+			err := s.SaveURL(&models.URLData{
 				UUID: "1",
 				ShortURL: tt.shortURL,
 				OriginalURL: tt.originalURL,
 			})
-
+			require.NoError(t, err)
+			
 			log, err := logger.New("info")
 			require.NoError(t, err)
 

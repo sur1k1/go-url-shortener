@@ -11,7 +11,7 @@ import (
 )
 
 type URLSaver interface {
-	SaveURL(urlData models.URLData)
+	SaveURL(urlData *models.URLData) error
 }
 
 type SaveHandler struct {
@@ -60,7 +60,7 @@ func (h *SaveHandler) SaveHandler(rw http.ResponseWriter, req *http.Request) {
 	id := generate.GenerateID()
 
 	// Сохранение новой ссылки
-	h.saver.SaveURL(models.URLData{
+	err = h.saver.SaveURL(&models.URLData{
 		ShortURL: id,
 		OriginalURL: string(body),
 	})

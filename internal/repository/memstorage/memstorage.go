@@ -9,6 +9,7 @@ import (
 	"sync"
 
 	"github.com/sur1k1/go-url-shortener/internal/models"
+	"github.com/sur1k1/go-url-shortener/internal/repository"
 	"go.uber.org/zap"
 )
 
@@ -71,22 +72,29 @@ func (s *MemStorage) restoreStorage() error {
 	return nil
 }
 
-func (s *MemStorage) GetURL(shortURL string) (models.URLData, bool) {
+func (s *MemStorage) GetURL(shortURL string) (*models.URLData, error) {
+	const op = "storage.GetURL"
+
 	s.c.RLock()
 	defer s.c.RUnlock()
 
 	urlData, ok := s.URLs[shortURL]
+	if !ok {
+		return nil, fmt.Errorf("%s: %w", op, repository.ErrURLNotFound)
+	}
 
-	return urlData, ok
+	return &urlData, nil
 }
 
-func (s *MemStorage) SaveURL(urlData models.URLData) {
+func (s *MemStorage) SaveURL(urlData *models.URLData) error {
 	s.c.Lock()
 	defer s.c.Unlock()
 
 	urlData.UUID = strconv.Itoa(len(s.URLs) + 1)
-	s.URLs[urlData.ShortURL] = urlData
-	s.writeFile(urlData)
+	s.URLs[urlData.ShortURL] = *urlData
+	s.writeFile(*urlData)
+
+	return nil
 }
 
 func (s *MemStorage) writeFile(urlData models.URLData) error {

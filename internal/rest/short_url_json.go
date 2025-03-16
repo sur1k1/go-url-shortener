@@ -2,11 +2,13 @@ package rest
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"strings"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/sur1k1/go-url-shortener/internal/models"
+	"github.com/sur1k1/go-url-shortener/internal/repository"
 	"github.com/sur1k1/go-url-shortener/internal/util/generate"
 	"go.uber.org/zap"
 )
@@ -59,10 +61,30 @@ func (h *ShortenJSONHandler) ShortJSONHandler(rw http.ResponseWriter, req *http.
 	id := generate.GenerateID()
 
 	// Сохранение новой ссылки
-	h.saver.SaveURL(models.URLData{
+	err := h.saver.SaveURL(&models.URLData{
 		ShortURL: id,
 		OriginalURL: reqBody.URL,
 	})
+	if err != nil {
+		if errors.Is(err, repository.ErrURLExists) {
+			h.log.Info(
+				"url is exist",
+				zap.String("path", op),
+				zap.String("id", id),
+			)
+
+			http.Error(rw, "url is exist", http.StatusBadRequest)
+			return
+		}
+
+		h.log.Info(
+			"failed to save url",
+			zap.String("path", op),
+		)
+
+		http.Error(rw, "failed to save url", http.StatusInternalServerError)
+		return
+	}
 
 	resp := models.ShortenResponse{
 		Reslut: h.pubAddr + "/" + id,

@@ -13,8 +13,8 @@ import (
 )
 
 type ServiceRepository interface {
-	GetURL(shortURL string) (models.URLData, bool)
-	SaveURL(urlData models.URLData)
+	GetURL(shortURL string) (*models.URLData, error)
+	SaveURL(urlData *models.URLData) error
 }
 
 type App struct {
