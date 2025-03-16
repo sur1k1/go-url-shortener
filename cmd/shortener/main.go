@@ -44,5 +44,12 @@ func main() {
 
 	<- stop
 
+	// Close file on shutdown
+	err = s.Close()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+    os.Exit(1)
+	}
+
 	log.Info("Gracefully stopped")
 }
