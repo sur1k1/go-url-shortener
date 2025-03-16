@@ -7,7 +7,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/sur1k1/go-url-shortener/internal/config"
 	"github.com/sur1k1/go-url-shortener/internal/logger"
 	"github.com/sur1k1/go-url-shortener/internal/models"
 	storage "github.com/sur1k1/go-url-shortener/internal/repository/memstorage"
@@ -17,13 +16,10 @@ import (
 func TestHandlers_RedirectHandler(t *testing.T) {
 	const tempURL = "http://localhost:8080/"
 
-	// Getting a configuration
-	cf := config.MustGetConfig()
-
 	log, err := logger.New("info")
 	require.NoError(t, err)
 
-	s, err := storage.NewStorage(log, cf.FilePath)
+	s, err := storage.NewStorage(log, "temp_storage.txt")
 	require.NoError(t, err)
 
 	tests := []struct {
@@ -49,7 +45,7 @@ func TestHandlers_RedirectHandler(t *testing.T) {
 				OriginalURL: tt.originalURL,
 			})
 			require.NoError(t, err)
-			
+
 			log, err := logger.New("info")
 			require.NoError(t, err)
 

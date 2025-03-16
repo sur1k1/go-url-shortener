@@ -10,19 +10,15 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/sur1k1/go-url-shortener/internal/config"
 	"github.com/sur1k1/go-url-shortener/internal/logger"
 	storage "github.com/sur1k1/go-url-shortener/internal/repository/memstorage"
 )
 
 func TestHandlers_SaveHandler(t *testing.T) {
-	// Getting a configuration
-	cf := config.MustGetConfig()
-
 	log, err := logger.New("info")
 	require.NoError(t, err)
 
-	s, err := storage.NewStorage(log, cf.FilePath)
+	s, err := storage.NewStorage(log, "temp_storage.txt")
 	require.NoError(t, err)
 
 	tests := []struct {
