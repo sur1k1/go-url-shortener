@@ -31,17 +31,6 @@ func NewRedirectHandler(r *chi.Mux, u URLGetter, log *zap.Logger) {
 func (h *RedirectHandler) RedirectHandler(rw http.ResponseWriter, req *http.Request) {
 	const op = "rest.RedirectHandler"
 
-	// Валидация запроса
-	if len(req.URL.Path) < 1 {
-		h.log.Info(
-			"invalid url path",
-			zap.String("path", op),
-		)
-
-		http.Error(rw, "incorrect url", http.StatusBadRequest)
-		return
-	}
-
 	// Парсинг URL для получения ID
 	id := req.URL.Path[1:]
 	
