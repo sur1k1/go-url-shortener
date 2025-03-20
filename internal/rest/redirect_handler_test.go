@@ -6,11 +6,21 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"github.com/sur1k1/go-url-shortener/internal/logger"
+	"github.com/sur1k1/go-url-shortener/internal/models"
 	storage "github.com/sur1k1/go-url-shortener/internal/repository/memstorage"
+	"github.com/sur1k1/go-url-shortener/internal/util/generate"
 )
 
 func TestHandlers_RedirectHandler(t *testing.T) {
 	const tempURL = "http://localhost:8080/"
+
+	log, err := logger.New("info")
+	require.NoError(t, err)
+
+	s, err := storage.NewStorage(log, "temp_storage.txt")
+	require.NoError(t, err)
 
 	tests := []struct {
 		name        string
@@ -22,17 +32,24 @@ func TestHandlers_RedirectHandler(t *testing.T) {
 		{
 			name:        "status code 307",
 			originalURL: "https://stackoverflow.com/",
-			shortURL:    generateID(),
+			shortURL:    generate.GenerateID(),
 			httpMethod:  http.MethodGet,
 			wantStatus:  http.StatusTemporaryRedirect,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := storage.NewStorage()
-			s.URLs[tt.shortURL] = tt.originalURL
+			err := s.SaveURL(&models.URLData{
+				UUID: "1",
+				ShortURL: tt.shortURL,
+				OriginalURL: tt.originalURL,
+			})
+			require.NoError(t, err)
 
-			h := &RedirectHandler{getter: s}
+			log, err := logger.New("info")
+			require.NoError(t, err)
+
+			h := &RedirectHandler{getter: s, log: log}
 
 			req := httptest.NewRequest(tt.httpMethod, tempURL+tt.shortURL, nil)
 			rw := httptest.NewRecorder()

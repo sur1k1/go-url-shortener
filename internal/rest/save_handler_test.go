@@ -10,10 +10,17 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/sur1k1/go-url-shortener/internal/logger"
 	storage "github.com/sur1k1/go-url-shortener/internal/repository/memstorage"
 )
 
 func TestHandlers_SaveHandler(t *testing.T) {
+	log, err := logger.New("info")
+	require.NoError(t, err)
+
+	s, err := storage.NewStorage(log, "temp_storage.txt")
+	require.NoError(t, err)
+
 	tests := []struct {
 		name        string
 		contentType string
@@ -22,7 +29,7 @@ func TestHandlers_SaveHandler(t *testing.T) {
 		wantStatus  int
 	}{
 		{
-			name:        "status code 200",
+			name:        "status code 201",
 			contentType: "text/plain",
 			httpMethod:  http.MethodPost,
 			originalURL: "https://www.google.com/",
@@ -32,16 +39,19 @@ func TestHandlers_SaveHandler(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			const publicAddress = "http://localhost:8080/"
-
-			s := storage.NewStorage()
+			const path = "/"
 
 			r := chi.NewRouter()
-			NewSaveHandler(r, s, publicAddress)
+
+			log, err := logger.New("info")
+			require.NoError(t, err)
+
+			NewSaveHandler(r, s, publicAddress, log)
 
 			ts := httptest.NewServer(r)
 			defer ts.Close()
 
-			statusCode, contentType, body := testSaveRequest(t, ts, tt.httpMethod, "/", tt.contentType, strings.NewReader(tt.originalURL))
+			statusCode, contentType, body := testSaveRequest(t, ts, tt.httpMethod, path, tt.contentType, strings.NewReader(tt.originalURL))
 
 			assert.NotNil(t, body, "body is nil")
 			
